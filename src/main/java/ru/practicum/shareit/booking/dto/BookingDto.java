@@ -15,21 +15,11 @@ import java.time.LocalDateTime;
 public class BookingDto {
 
     private long id;
-
-
     private long itemId;
-
-
     private long bookerId;
-
-
     @FutureOrPresent
     private LocalDateTime start;
-
-
     @Future
     private LocalDateTime end;
-
-
     private BookingStatus status;
 }

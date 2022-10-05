@@ -2,9 +2,14 @@ package ru.practicum.shareit.item.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.comment.CommentService;
+import ru.practicum.shareit.booking.repositoty.BookingStorage;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.comment.CommentDto;
+import ru.practicum.shareit.item.comment.CommentMapper;
+import ru.practicum.shareit.item.comment.CommentStorage;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.exceptions.ItemNotFound;
@@ -12,12 +17,14 @@ import ru.practicum.shareit.item.exceptions.ItemNullParametr;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repositores.ItemStorage;
+import ru.practicum.shareit.user.exceptions.UserNotBooker;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.services.UserService;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +35,9 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemStorage itemStorage; // Если стоит final для неинициализированного поля то конструктор нужен обязательно
     private final UserService userService;
+    private final BookingStorage bookingStorage;
+    private final CommentStorage commentStorage;
+
 
     @Override
     public ItemDto createItem(ItemDto itemDto, long userId) throws ItemNullParametr {
@@ -82,32 +92,33 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseDto findItemById(long itemId,
-                                        long userId,
-                                        BookingService bookingService,
-                                        CommentService commentService) {
+                                        long userId) {
         Item item = checkItem(itemId);
         User user = userService.checkUser(userId);
+        List<CommentDto> comments = CommentMapper
+                .toCommentDtos(commentStorage.getCommentsByItem_idOrderByCreatedDesc(itemId));
         if (user.equals(item.getOwner())) {
-            Booking lastBooking = bookingService.getLastBookingByItem(itemId);
-            Booking nextBooking = bookingService.getNextBookingByItem(itemId);
-            return ItemMapper.toItemResponseDto(item, lastBooking, nextBooking, commentService);
+            Booking lastBooking = bookingStorage.findFirstByItem_idAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now());
+            Booking nextBooking = bookingStorage.findFirstByItem_idAndStartAfterOrderByStartDesc(itemId, LocalDateTime.now());
+            return ItemMapper.toItemResponseDto(item, lastBooking, nextBooking, comments);
         }
-        return ItemMapper.toItemResponseDto(item, null, null, commentService);
+        return ItemMapper.toItemResponseDto(item, null, null, comments);
     }
 
     @Override
-    public List<ItemResponseDto> findAllItemsByUserId(long userId,
-                                                      BookingService bookingService,
-                                                      CommentService commentService) {
+    public List<ItemResponseDto> findAllItemsByUserId(long userId) {
+        List<ItemResponseDto> itemResponseDtos = new ArrayList<>();
         User owner = userService.checkUser(userId);
         List<Item> items = itemStorage.findAllByOwnerIdOrderByIdAsc(owner.getId());
-        return items.stream().map(item -> ItemMapper.toItemResponseDto(
-                        item,
-                        bookingService.getLastBookingByItem(item.getId()),
-                        bookingService.getNextBookingByItem(item.getId()),
-                        commentService))
-                .sorted(Comparator.comparing(ItemResponseDto::getId))
-                .collect(Collectors.toList());
+        for (Item item : items) {
+            List<CommentDto> comments = CommentMapper
+                    .toCommentDtos(commentStorage.getCommentsByItem_idOrderByCreatedDesc(item.getId()));
+            itemResponseDtos.add(ItemMapper.toItemResponseDto(item,
+                    bookingStorage.findFirstByItem_idAndEndBeforeOrderByEndDesc(item.getId(), LocalDateTime.now()),
+                    bookingStorage.findFirstByItem_idAndStartAfterOrderByStartDesc(item.getId(), LocalDateTime.now()),
+                    comments));
+        }
+        return itemResponseDtos;
     }
 
     @Override
@@ -128,5 +139,38 @@ public class ItemServiceImpl implements ItemService {
         } else {
             throw new ItemNotFound("Item by ID: %s  - not found", itemId);
         }
+    }
+
+    public CommentDto postComment(long itemId, long userId, CommentDto commentDto)
+            throws UserNotBooker, ItemNullParametr {
+        if (commentDto.getText().isEmpty()) {
+            throw new BadRequestException("Comment is empty text");
+        }
+        User user = userService.checkUser(userId);
+        Item item = checkItem(itemId);
+        List<Booking> bookings = bookingStorage.findByItem_IdAndBooker_IdOrderByStartDesc(itemId, userId);
+        if (!bookings.isEmpty()) {
+            if (bookings.stream().anyMatch(booking ->
+                    (!BookingStatus.REJECTED.equals(booking.getStatus())
+                            && !BookingStatus.WAITING.equals(booking.getStatus())) &&
+                            !booking.getStart().isAfter(LocalDateTime.now()))) {
+                Comment comment = new Comment();
+                comment.setAuthor(user);
+                comment.setItem(item);
+                comment.setText(commentDto.getText());
+                comment = commentStorage.save(comment);
+                return CommentMapper.toCommentDto(comment);
+            }
+            throw new BadRequestException("Booking bad status");
+        } else {
+            throw new UserNotBooker("This User not Booker for this Item", userId);
+        }
+    }
+
+    @Override
+    public List<CommentDto> getAllCommentsByItem(long itemId) {
+        Item item = checkItem(itemId);
+        List<Comment> comments = commentStorage.getCommentsByItem_idOrderByCreatedDesc(itemId);
+        return comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toList());
     }
 }

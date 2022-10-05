@@ -11,7 +11,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repositoryes.UserStorage;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,10 +23,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto createUser(UserDto userDto) throws UserDtoBadRequest {
-        User user = UserMapper.toUser(userDto);
-        if (user.getEmail() == null || user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
+        if (userDto.getEmail() == null || userDto.getEmail().isEmpty() || !userDto.getEmail().contains("@")) {
             throw new UserDtoBadRequest("BAD EMAIL");
         }
+        User user = UserMapper.toUser(userDto);
         user = userStorage.save(user);
         return UserMapper.toUserDto(user);
     }
@@ -42,6 +41,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }
+        userStorage.save(user);
         return UserMapper.toUserDto(user);
     }
 
@@ -67,11 +67,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User checkUser(long userId) throws UserNotFound {
-        Optional<User> optionalUser = userStorage.findById(userId);
-        if (optionalUser.isPresent()) {
-            return optionalUser.get();
-        } else {
-            throw new UserNotFound(String.format("User by ID: %s - not found", userId));
-        }
+        return userStorage.findById(userId)
+                .orElseThrow(() -> new UserNotFound(String.format("User by ID: %s not found", userId)));
     }
 }

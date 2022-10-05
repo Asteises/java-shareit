@@ -3,6 +3,9 @@ package ru.practicum.shareit.item.comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class CommentMapper {
@@ -21,5 +24,9 @@ public class CommentMapper {
         Comment comment = new Comment();
         comment.setText(commentDto.getText());
         return comment;
+    }
+
+    public static List<CommentDto> toCommentDtos(List<Comment> comments) {
+        return comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toList());
     }
 }

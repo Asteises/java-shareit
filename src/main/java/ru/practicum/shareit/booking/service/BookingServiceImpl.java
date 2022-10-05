@@ -177,10 +177,6 @@ public class BookingServiceImpl implements BookingService {
         throw new ItemNullParametr("Unknown state: UNSUPPORTED_STATUS");
     }
 
-    public List<Booking> findAllBookingByItemIdAndBooker(long itemId, long bookerId) {
-        return bookingRepository.findByItem_IdAndBooker_IdOrderByStartDesc(itemId, bookerId);
-    }
-
     @Override
     public Booking getLastBookingByItem(long itemId) {
         return bookingRepository.findFirstByItem_idAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now());

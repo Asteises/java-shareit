@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.comment.CommentDto;
-import ru.practicum.shareit.item.comment.CommentService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Item;
@@ -41,8 +40,7 @@ public class ItemMapper {
     public static ItemResponseDto toItemResponseDto(Item item,
                                                     Booking lastBooking,
                                                     Booking nextBooking,
-                                                    CommentService commentService) {
-        List<CommentDto> commentDtos = commentService.getAllCommentsByItem(item.getId());
+                                                    List<CommentDto> comments) {
         return new ItemResponseDto(
                 item.getId(),
                 item.getName(),
@@ -50,7 +48,7 @@ public class ItemMapper {
                 item.getAvailable(),
                 lastBooking == null ? null : BookingMapper.toBookingDto(lastBooking),
                 nextBooking == null ? null : BookingMapper.toBookingDto(nextBooking),
-                commentDtos
+                comments
         );
     }
 }
