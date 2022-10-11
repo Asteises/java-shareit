@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.repositores;
+package ru.practicum.shareit.item.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,5 +17,7 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
             "OR lower(I.DESCRIPTION) LIKE lower(concat('%', :description, '%'))" +
             "AND I.AVAILABLE = TRUE)", nativeQuery = true)
     List<Item> findAllByNameAndDescriptionLowerCase(String name, String description);
+
+    List<Item> findAllByRequest_IdOrderByRequestIdDesc(long requestId);
 
 }

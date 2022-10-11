@@ -8,7 +8,7 @@ import ru.practicum.shareit.user.exceptions.UserDtoBadRequest;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repositoryes.UserStorage;
+import ru.practicum.shareit.user.repositories.UserStorage;
 
 import java.util.List;
 import java.util.stream.Collectors;

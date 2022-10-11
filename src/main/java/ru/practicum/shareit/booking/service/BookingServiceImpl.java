@@ -9,7 +9,7 @@ import ru.practicum.shareit.booking.exception.BookingNotFound;
 import ru.practicum.shareit.booking.exception.BookingWrongTime;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.repositoty.BookingStorage;
+import ru.practicum.shareit.booking.repositories.BookingStorage;
 import ru.practicum.shareit.item.exceptions.ItemNullParametr;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.services.ItemService;

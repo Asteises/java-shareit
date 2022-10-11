@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.repositoty.BookingStorage;
+import ru.practicum.shareit.booking.repositories.BookingStorage;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
@@ -16,7 +16,9 @@ import ru.practicum.shareit.item.exceptions.ItemNotFound;
 import ru.practicum.shareit.item.exceptions.ItemNullParametr;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repositores.ItemStorage;
+import ru.practicum.shareit.item.repositories.ItemStorage;
+import ru.practicum.shareit.request.model.entity.ItemRequest;
+import ru.practicum.shareit.request.repositories.RequestStorage;
 import ru.practicum.shareit.user.exceptions.UserNotBooker;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
@@ -37,6 +39,8 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final BookingStorage bookingStorage;
     private final CommentStorage commentStorage;
+
+    private final RequestStorage requestStorage;
 
 
     @Override

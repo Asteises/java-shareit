@@ -7,16 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ItemDto {
+public class ItemForRequestDto {
 
     private long id;
 
     private String name;
 
-    private String description;
-
-    private Boolean available;
-
-    private long requestId;
+    private long ownerId;
 
 }
