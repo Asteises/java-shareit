@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.services;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -24,9 +25,9 @@ public interface ItemService {
 
     ItemResponseDto findItemById(long itemId, long userId) throws ItemNotFound;
 
-    List<ItemResponseDto> findAllItemsByUserId(long userId);
+    List<ItemResponseDto> findAllItemsByUserId(long userId, Integer from, Integer size);
 
-    List<ItemDto> searchItemsByNameAndDescription(String text);
+    List<ItemDto> searchItemsByNameAndDescription(String text, Integer from, Integer size);
 
     Item checkItem(long itemId);
 

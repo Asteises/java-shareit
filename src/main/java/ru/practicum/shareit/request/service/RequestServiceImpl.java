@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -56,9 +57,10 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<RequestWithResponseDto> getAllResponsesForAllRequests(long userId) throws UserNotFound {
+    public List<RequestWithResponseDto> getAllResponsesForAllRequests(long userId, Integer from, Integer size)
+            throws UserNotFound {
         userService.checkUser(userId);
-        List<ItemRequest> itemRequests = requestStorage.findAllByRequestor_IdOrderByCreatedDesc(userId);
+        Page<ItemRequest> itemRequests = requestStorage.findAllByRequestor_IdOrderByCreatedDesc(userId, PageRequest.of(from, size));
         List<RequestWithResponseDto> requestWithResponseDtos = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             List<Item> items = itemStorage.findAllByRequest_IdOrderByRequestIdDesc(itemRequest.getId());
@@ -70,21 +72,18 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<ItemRequestDto> getAllRequests(long userId, Integer from, Integer size) throws UserNotFound, BadRequestException {
-        userService.checkUser(userId);
-        if (from == null && size == null) {
-            List<ItemRequest> requests = requestStorage.findAll();
-            return requests.stream().map(RequestMapper::toItemRequestDto).collect(Collectors.toList());
-        }
-        if (size == 0) {
-            throw new  BadRequestException("size == 0");
-        }
+    public List<ItemRequestDto> getAllRequestsByUserId(long userId, Integer from, Integer size)
+            throws UserNotFound, BadRequestException {
+        User user = userService.checkUser(userId);
         Page<ItemRequest> itemRequests = requestStorage.findAll(PageRequest.of(from, size));
-        return itemRequests.stream().map(RequestMapper::toItemRequestDto).collect(Collectors.toList());
+        return itemRequests.stream()
+                .filter(itemRequest -> !itemRequest.getRequestor().equals(user))
+                .map(RequestMapper::toItemRequestDto).collect(Collectors.toList());
     }
 
     @Override
-    public RequestWithResponseDto getRequestById(long requestId) {
+    public RequestWithResponseDto getRequestById(long userId, long requestId) {
+        userService.checkUser(userId);
         ItemRequest itemRequest = checkItemRequest(requestId);
         List<Item> items = itemStorage.findAllByRequest_IdOrderByRequestIdDesc(itemRequest.getId());
         List<ItemForRequestDto> requests = items.stream().map(ItemMapper::toItemForRequestDto).collect(Collectors.toList());

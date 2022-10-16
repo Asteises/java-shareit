@@ -14,9 +14,9 @@ public interface RequestService {
 
     ItemRequestDto createRequest(ItemRequestDto itemRequestDto, long userId);
 
-    List<RequestWithResponseDto> getAllResponsesForAllRequests(long userId);
+    List<RequestWithResponseDto> getAllResponsesForAllRequests(long userId, Integer from, Integer size);
 
-    List<ItemRequestDto> getAllRequests(long userId, Integer from, Integer size);
+    List<ItemRequestDto> getAllRequestsByUserId(long userId, Integer from, Integer size);
 
-    RequestWithResponseDto getRequestById(long requestId);
+    RequestWithResponseDto getRequestById(long userId, long requestId);
 }

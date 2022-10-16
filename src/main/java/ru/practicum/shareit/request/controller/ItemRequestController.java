@@ -29,20 +29,24 @@ public class ItemRequestController {
         return requestService.createRequest(itemRequestDto, userId);
     }
 
-    @GetMapping
-    public List<RequestWithResponseDto> getAllResponsesForAllRequests(@RequestHeader ("X-Sharer-User-Id") long userId){
-        return requestService.getAllResponsesForAllRequests(userId);
+    @GetMapping()
+    public List<RequestWithResponseDto> getAllResponsesForAllRequests(
+            @RequestHeader ("X-Sharer-User-Id") long userId,
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+            @RequestParam(required = false, defaultValue = "100") @Min(1) Integer size){
+        return requestService.getAllResponsesForAllRequests(userId, from, size);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDto> getAllRequests(@RequestHeader ("X-Sharer-User-Id") long userId,
-                                               @RequestParam(required = false) @Min(0) Integer from,
-                                               @RequestParam(required = false) @Min(0) Integer size) {
-        return requestService.getAllRequests(userId, from, size);
+    public List<ItemRequestDto> getAllRequestsByUserId(@RequestHeader ("X-Sharer-User-Id") long userId,
+                                               @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                               @RequestParam(required = false, defaultValue = "100") @Min(1) Integer size) {
+        return requestService.getAllRequestsByUserId(userId, from, size);
     }
 
     @GetMapping("/{requestId}")
-    public RequestWithResponseDto getRequestById(@PathVariable long requestId) {
-        return requestService.getRequestById(requestId);
+    public RequestWithResponseDto getRequestById(@RequestHeader ("X-Sharer-User-Id") long userId,
+                                                 @PathVariable long requestId) {
+        return requestService.getRequestById(userId, requestId);
     }
 }

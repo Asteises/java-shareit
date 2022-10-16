@@ -25,13 +25,16 @@ public interface BookingService {
     BookingResponseDto getBooking(long bookingId, long userID)
             throws BookingNotFound, UserNotFound, UserNotOwner, UserNotBooker;
 
-    List<BookingResponseDto> getAllBookingsByBooker(String state, long userId) throws UserNotFound;
+    List<BookingResponseDto> getAllBookingsByBooker(String state, long userId, Integer from, Integer size)
+            throws UserNotFound;
 
-    List<BookingResponseDto> getAllBookingsByOwner(String state, long userId) throws UserNotFound;
+    List<BookingResponseDto> getAllBookingsByOwner(String state, long userId, Integer from, Integer size)
+            throws UserNotFound;
 
     Booking getLastBookingByItem(long itemId);
 
     Booking getNextBookingByItem(long itemId);
 
     Booking checkBooking(long bookingId) throws BookingNotFound;
+
 }

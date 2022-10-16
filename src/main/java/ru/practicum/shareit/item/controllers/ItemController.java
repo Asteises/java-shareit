@@ -11,6 +11,7 @@ import ru.practicum.shareit.item.services.ItemService;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
@@ -50,14 +51,18 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponseDto> findAllItemsByUserId(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.findAllItemsByUserId(userId);
+    public List<ItemResponseDto> findAllItemsByUserId(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                      @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                                      @RequestParam(required = false, defaultValue = "100") @Min(1) Integer size) {
+        return itemService.findAllItemsByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemDto> searchItemsByNameAndDescription(@RequestParam String text) {
-        return itemService.searchItemsByNameAndDescription(text);
+    public List<ItemDto> searchItemsByNameAndDescription(@RequestParam String text,
+                                                         @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                                         @RequestParam(required = false, defaultValue = "100") @Min(1) Integer size) {
+        return itemService.searchItemsByNameAndDescription(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

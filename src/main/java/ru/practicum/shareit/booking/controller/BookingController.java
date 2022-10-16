@@ -21,6 +21,7 @@ import ru.practicum.shareit.user.exceptions.UserNotBooker;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.exceptions.UserNotOwner;
 
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
@@ -55,15 +56,21 @@ public class BookingController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public List<BookingResponseDto> getAllBookingsByBooker(@RequestParam(defaultValue = "ALL") String state,
-                                                   @RequestHeader("X-Sharer-User-Id") long userId) throws UserNotFound {
-        return bookingService.getAllBookingsByBooker(state, userId);
+    public List<BookingResponseDto> getAllBookingsByBooker(
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+            @RequestParam(required = false, defaultValue = "100") @Min(1) Integer size) throws UserNotFound {
+        return bookingService.getAllBookingsByBooker(state, userId, from, size);
     }
 
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
-    public List<BookingResponseDto> getAllBookingsByOwner(@RequestParam(defaultValue = "ALL") String state,
-                                                  @RequestHeader("X-Sharer-User-Id") long userId) throws UserNotFound {
-        return bookingService.getAllBookingsByOwner(state, userId);
+    public List<BookingResponseDto> getAllBookingsByOwner(
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+            @RequestParam(required = false, defaultValue = "100") @Min(1) Integer size) throws UserNotFound {
+        return bookingService.getAllBookingsByOwner(state, userId, from, size);
     }
 }

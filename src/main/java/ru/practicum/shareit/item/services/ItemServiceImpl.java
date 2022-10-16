@@ -1,11 +1,14 @@
 package ru.practicum.shareit.item.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repositories.BookingStorage;
 import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.comment.CommentMapper;
@@ -44,9 +47,19 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemDto createItem(ItemDto itemDto, long userId) throws ItemNullParametr {
+    public ItemDto createItem(ItemDto itemDto, long userId) throws ItemNullParametr, NotFoundException {
         User owner = userService.checkUser(userId);
-        Item item = ItemMapper.toItem(itemDto, owner, null);
+        Item item;
+        if (itemDto.getRequestId() == null) {
+            item = ItemMapper.toItem(itemDto, owner, null);
+        } else {
+            Optional<ItemRequest> optionalItemRequest = requestStorage.findById(itemDto.getRequestId());
+            if (optionalItemRequest.isPresent()) {
+                item = ItemMapper.toItem(itemDto, owner, optionalItemRequest.get());
+            } else {
+                throw new NotFoundException(String.format("ItemRequest with ID: %s not found", itemDto.getRequestId()));
+            }
+        }
         if (item.getAvailable() == null) {
             throw new ItemNullParametr(String.format("Available not exist - %s", item.getAvailable()));
         }
@@ -110,10 +123,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemResponseDto> findAllItemsByUserId(long userId) {
+    public List<ItemResponseDto> findAllItemsByUserId(long userId, Integer from, Integer size) {
         List<ItemResponseDto> itemResponseDtos = new ArrayList<>();
         User owner = userService.checkUser(userId);
-        List<Item> items = itemStorage.findAllByOwnerIdOrderByIdAsc(owner.getId());
+        Page<Item> items = itemStorage.findAllByOwnerIdOrderByIdAsc(owner.getId(), PageRequest.of(from, size));
         for (Item item : items) {
             List<CommentDto> comments = CommentMapper
                     .toCommentDtos(commentStorage.getCommentsByItem_idOrderByCreatedDesc(item.getId()));
@@ -126,10 +139,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItemsByNameAndDescription(String text) {
+    public List<ItemDto> searchItemsByNameAndDescription(String text, Integer from, Integer size) {
         if (!text.isEmpty()) {
             text = text.toLowerCase();
-            return itemStorage.findAllByNameAndDescriptionLowerCase(text, text).stream()
+            return itemStorage.findAllByNameAndDescriptionLowerCase(text, text, PageRequest.of(from, size)).stream()
                     .map(ItemMapper::toItemDto).collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -176,5 +189,15 @@ public class ItemServiceImpl implements ItemService {
         Item item = checkItem(itemId);
         List<Comment> comments = commentStorage.getCommentsByItem_idOrderByCreatedDesc(itemId);
         return comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toList());
+    }
+
+    public static Boolean checkPaging(Integer from, Integer size) throws BadRequestException {
+        if (from == null && size == null) {
+            return false;
+        }
+        if (size == 0) {
+            throw new BadRequestException("size == 0");
+        }
+        return true;
     }
 }
