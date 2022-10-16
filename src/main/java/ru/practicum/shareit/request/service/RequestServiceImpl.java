@@ -2,9 +2,7 @@ package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -19,7 +17,6 @@ import ru.practicum.shareit.request.model.entity.ItemRequest;
 import ru.practicum.shareit.request.repositories.RequestStorage;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repositories.UserStorage;
 import ru.practicum.shareit.user.services.UserService;
 
 import java.util.ArrayList;
@@ -36,7 +33,8 @@ public class RequestServiceImpl implements RequestService {
     private final UserService userService;
 
     @Override
-    public ItemRequestDto createRequest(ItemRequestDto itemRequestDto, long userId) throws BadRequestException, UserNotFound {
+    public ItemRequestDto createRequest(ItemRequestDto itemRequestDto, long userId)
+            throws BadRequestException, UserNotFound {
         if (itemRequestDto.getDescription() == null || itemRequestDto.getDescription().isEmpty()) {
             throw new BadRequestException("ItemRequest Description is empty");
         }
@@ -60,11 +58,14 @@ public class RequestServiceImpl implements RequestService {
     public List<RequestWithResponseDto> getAllResponsesForAllRequests(long userId, Integer from, Integer size)
             throws UserNotFound {
         userService.checkUser(userId);
-        Page<ItemRequest> itemRequests = requestStorage.findAllByRequestor_IdOrderByCreatedDesc(userId, PageRequest.of(from, size));
+        Page<ItemRequest> itemRequests = requestStorage.findAllByRequestor_IdOrderByCreatedDesc(
+                userId, PageRequest.of(from, size));
         List<RequestWithResponseDto> requestWithResponseDtos = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             List<Item> items = itemStorage.findAllByRequest_IdOrderByRequestIdDesc(itemRequest.getId());
-            List<ItemForRequestDto> requests = items.stream().map(ItemMapper::toItemForRequestDto).collect(Collectors.toList());
+            List<ItemForRequestDto> requests = items.stream()
+                    .map(ItemMapper::toItemForRequestDto)
+                    .collect(Collectors.toList());
             RequestWithResponseDto request = RequestMapper.toRequestWithResponseDto(itemRequest, requests);
             requestWithResponseDtos.add(request);
         }
@@ -86,7 +87,9 @@ public class RequestServiceImpl implements RequestService {
         userService.checkUser(userId);
         ItemRequest itemRequest = checkItemRequest(requestId);
         List<Item> items = itemStorage.findAllByRequest_IdOrderByRequestIdDesc(itemRequest.getId());
-        List<ItemForRequestDto> requests = items.stream().map(ItemMapper::toItemForRequestDto).collect(Collectors.toList());
+        List<ItemForRequestDto> requests = items.stream()
+                .map(ItemMapper::toItemForRequestDto)
+                .collect(Collectors.toList());
         return RequestMapper.toRequestWithResponseDto(itemRequest, requests);
     }
 }
