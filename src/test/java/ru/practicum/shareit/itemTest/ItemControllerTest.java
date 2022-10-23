@@ -62,8 +62,8 @@ public class ItemControllerTest {
 
         Mockito.when(itemService.createItem(Mockito.any(ItemDto.class), anyLong())).thenReturn(itemDto);
 
-        mvc.perform(patch("/items/{itemId}", i).()
-
-        )
+//        mvc.perform(patch("/items/{itemId}", i).()
+//
+//        )
     }
 }

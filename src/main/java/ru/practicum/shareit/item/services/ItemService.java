@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.services;
 
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;

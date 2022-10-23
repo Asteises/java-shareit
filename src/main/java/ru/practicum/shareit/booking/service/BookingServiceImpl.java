@@ -16,8 +16,6 @@ import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.item.exceptions.ItemNullParametr;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.services.ItemService;
-import ru.practicum.shareit.request.mapper.RequestMapper;
-import ru.practicum.shareit.request.model.entity.ItemRequest;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.services.UserService;
@@ -104,9 +102,12 @@ public class BookingServiceImpl implements BookingService {
             throws ItemNullParametr {
         User booker = userService.checkUser(userId);
         if (state.equals("ALL")) {
-            if(checkPaging(from, size)) { // Проверяем какие значения пришли, если true - выводим с пагинацией
-                Page<Booking> bookings = bookingRepository
-                        .findAllByBookerOrderByStartDesc(booker, PageRequest.of(from, size));
+            if (checkPaging(from, size)) { // Проверяем какие значения пришли, если true - выводим с пагинацией
+                if (from != 0) {
+                    from -= 1;
+                }
+                Page<Booking> bookings = bookingRepository.findAllByBookerOrderByStartDesc(
+                        booker, PageRequest.of(from, size));
                 return bookings.stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
             } else { // В противном случае выводим условно все!
                 return bookingRepository.findAllByBookerOrderByStartDesc(booker, PageRequest.of(0, 100))
@@ -156,9 +157,8 @@ public class BookingServiceImpl implements BookingService {
             throws UserNotFound {
         userService.checkUser(userId);
         if (state.equals("ALL")) {
-            if(checkPaging(from, size)) {
-                Page<Booking> bookings = bookingRepository
-                        .findAllByItemOwner(userId, PageRequest.of(from, size));
+            if (checkPaging(from, size)) {
+                Page<Booking> bookings = bookingRepository.findAllByItemOwner(userId, PageRequest.of(from, size));
                 return bookings.stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
             }
             return bookingRepository.findAllByItemOwner(userId, PageRequest.of(0, 100)).stream()

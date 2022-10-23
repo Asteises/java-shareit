@@ -60,26 +60,15 @@ public class RequestServiceImpl implements RequestService {
         userService.checkUser(userId);
         Page<ItemRequest> itemRequests = requestStorage.findAllByRequestor_IdOrderByCreatedDesc(
                 userId, PageRequest.of(from, size));
-        List<RequestWithResponseDto> requestWithResponseDtos = new ArrayList<>();
-        for (ItemRequest itemRequest : itemRequests) {
-            List<Item> items = itemStorage.findAllByRequest_IdOrderByRequestIdDesc(itemRequest.getId());
-            List<ItemForRequestDto> requests = items.stream()
-                    .map(ItemMapper::toItemForRequestDto)
-                    .collect(Collectors.toList());
-            RequestWithResponseDto request = RequestMapper.toRequestWithResponseDto(itemRequest, requests);
-            requestWithResponseDtos.add(request);
-        }
-        return requestWithResponseDtos;
+        return getRequestWithResponseDto(itemRequests.toList());
     }
 
     @Override
-    public List<ItemRequestDto> getAllRequestsByUserId(long userId, Integer from, Integer size)
+    public List<RequestWithResponseDto> getAllRequestsOtherUsers(long userId, Integer from, Integer size)
             throws UserNotFound, BadRequestException {
         User user = userService.checkUser(userId);
-        Page<ItemRequest> itemRequests = requestStorage.findAll(PageRequest.of(from, size));
-        return itemRequests.stream()
-                .filter(itemRequest -> !itemRequest.getRequestor().equals(user))
-                .map(RequestMapper::toItemRequestDto).collect(Collectors.toList());
+        Page<ItemRequest> itemRequests = requestStorage.findAllByRequestorNot(user, PageRequest.of(from, size));
+        return getRequestWithResponseDto(itemRequests.toList());
     }
 
     @Override
@@ -91,5 +80,18 @@ public class RequestServiceImpl implements RequestService {
                 .map(ItemMapper::toItemForRequestDto)
                 .collect(Collectors.toList());
         return RequestMapper.toRequestWithResponseDto(itemRequest, requests);
+    }
+
+    List<RequestWithResponseDto> getRequestWithResponseDto(List<ItemRequest> itemRequests) {
+        List<RequestWithResponseDto> requestWithResponseDtos = new ArrayList<>();
+        for (ItemRequest itemRequest : itemRequests) {
+            List<Item> items = itemStorage.findAllByRequest_IdOrderByRequestIdDesc(itemRequest.getId());
+            List<ItemForRequestDto> requests = items.stream()
+                    .map(ItemMapper::toItemForRequestDto)
+                    .collect(Collectors.toList());
+            RequestWithResponseDto request = RequestMapper.toRequestWithResponseDto(itemRequest, requests);
+            requestWithResponseDtos.add(request);
+        }
+        return requestWithResponseDtos;
     }
 }
