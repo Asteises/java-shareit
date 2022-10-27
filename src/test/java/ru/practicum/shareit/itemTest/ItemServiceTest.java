@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 
 @SpringBootTest
 @Transactional
-//@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemServiceTest {
 
     @Autowired
@@ -30,16 +29,20 @@ public class ItemServiceTest {
         User user1 = getTestUser("user1@");
         User user2 = getTestUser("user2@");
         user1.setId(1L);
+        user2.setId(2L);
         ItemRequest itemRequest1 = getTestItemRequest(user1);
+        ItemRequest itemRequest2 = getTestItemRequest(user2);
         Item item1 = getTestItem(user1, itemRequest1);
+        Item item2 = getTestItem(user2, itemRequest2);
         item1.setId(1L);
+        item2.setId(2L);
 
         ItemResponseDto itemResponseDto = itemService.findItemById(item1.getId(), user1.getId());
 
         Assertions.assertNotNull(itemResponseDto);
         Assertions.assertEquals(itemResponseDto.getId(), item1.getId());
-        Assertions.assertEquals(itemResponseDto.getId(), item1.getId());
         Assertions.assertEquals(itemResponseDto.getName(), item1.getName());
+        Assertions.assertEquals(itemResponseDto.getDescription(), item1.getDescription());
     }
 
     User getTestUser(String email) {

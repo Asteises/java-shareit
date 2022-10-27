@@ -57,7 +57,7 @@ public class ItemServiceMockTest {
 
     @Test
     public void addItemTest() {
-        //
+        // Assign
         Mockito.when(userService.checkUser(anyLong())) // Когда вызовется метод checkUser() с любым long...
                 .thenReturn(getTestUser()); // ... вернуть тестовое значение
         Mockito.when(requestStorage.findById(anyLong())) // Когда вызовется метод findById() с любым long...
@@ -85,6 +85,12 @@ public class ItemServiceMockTest {
         Assertions.assertEquals(actualDto.getAvailable(), Boolean.TRUE);
         Assertions.assertEquals(actualDto.getRequestId(), 1L);
     }
+
+//    @Test
+//    public void findAllItemsByUserIdTest() {
+//        User testUser = getTestUser();
+//        Mockito.when(userService.checkUser(anyLong())).thenReturn(testUser);
+//    }
 
     private User getTestUser() {
         User user = new User();
