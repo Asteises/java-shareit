@@ -1,5 +1,6 @@
 package ru.practicum.shareit.userTest;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,6 +120,23 @@ public class UserServiceMockTest {
         assertEquals(user.getId(), result.getId());
         assertEquals(user.getName(), result.getName());
         assertEquals(user.getEmail(), result.getEmail());
+    }
+
+    @Test
+    public void checkUserTest() throws Exception {
+        // Assign
+        User user = getTestUser();
+
+        when(userStorage.findById(anyLong())).thenReturn(Optional.of(user));
+
+        // Act
+        User actualUser = userService.checkUser(user.getId());
+
+        // Assert
+        Assertions.assertNotNull(actualUser);
+        Assertions.assertEquals(user.getId(), actualUser.getId());
+        Assertions.assertEquals(user.getEmail(), actualUser.getEmail());
+        Assertions.assertEquals(user.getName(), actualUser.getName());
     }
 
     private User getTestUser() {

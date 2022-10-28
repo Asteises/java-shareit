@@ -13,6 +13,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repositories.BookingStorage;
 import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemNullParametr;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.services.ItemService;
@@ -209,12 +210,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking checkBooking(long bookingId) throws BookingNotFound {
+    public Booking checkBooking(long bookingId) throws NotFoundException {
         Optional<Booking> optionalBooking = bookingRepository.findById(bookingId);
         if (optionalBooking.isPresent()) {
             return optionalBooking.get();
         } else {
-            throw new BookingNotFound(String.format("Booking by ID: %s - not found", bookingId));
+            throw new NotFoundException(String.format("Booking by ID: %s - not found", bookingId));
         }
     }
 

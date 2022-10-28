@@ -16,6 +16,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repositories.BookingStorage;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.services.ItemService;
 import ru.practicum.shareit.request.model.entity.ItemRequest;
@@ -26,6 +27,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 
@@ -239,6 +242,53 @@ public class BookingServiceMockTest {
         Assertions.assertEquals(booking1.getBooker().getId(), actualBooking.getBooker().getId());
         Assertions.assertEquals(booking1.getItem().getId(), actualBooking.getItem().getId());
         Assertions.assertEquals(booking1.getStatus(), actualBooking.getStatus());
+    }
+
+    @Test
+    public void checkBookingTest() {
+        // Assign
+        User owner = getTestUser();
+        User booker = getTestUser();
+        ItemRequest itemRequest = getTestItemRequest(booker);
+        booker.setId(2L);
+        booker.setEmail("2@email.ru");
+        Item item = getTestItem(owner, itemRequest);
+        Booking booking = getTestBooking(booker, item);
+
+        Mockito.when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.of(booking));
+
+        // Act
+        Booking actualBooking = bookingService.checkBooking(booking.getId());
+
+        // Assert
+        Assertions.assertNotNull(actualBooking);
+        Assertions.assertEquals(booking.getId(), actualBooking.getId());
+        Assertions.assertEquals(booking.getBooker().getId(), actualBooking.getBooker().getId());
+        Assertions.assertEquals(booking.getItem().getId(), actualBooking.getItem().getId());
+        Assertions.assertEquals(booking.getStatus(), actualBooking.getStatus());
+    }
+
+    @Test
+    public void checkBookingTestError() throws Exception {
+        // Assign
+        User owner = getTestUser();
+        User booker = getTestUser();
+        ItemRequest itemRequest = getTestItemRequest(booker);
+        booker.setId(2L);
+        booker.setEmail("2@email.ru");
+        Item item = getTestItem(owner, itemRequest);
+        Booking booking = getTestBooking(booker, item);
+
+        Mockito.when(bookingRepository.findById(anyLong()))
+                .thenThrow(new NotFoundException("Booking by ID: %s - not found"));
+
+        // Act
+        final NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> bookingService.checkBooking(booking.getId()));
+
+        // Assert
+        assertEquals("Booking by ID: %s - not found", exception.getMessage());
     }
 
     private User getTestUser() {

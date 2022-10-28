@@ -1,6 +1,5 @@
 package ru.practicum.shareit.itemTest;
 
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,13 +27,14 @@ import ru.practicum.shareit.request.repositories.RequestStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.services.UserService;
 
-import javax.swing.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceMockTest {
@@ -249,7 +249,7 @@ public class ItemServiceMockTest {
 
         Mockito.when(userService.checkUser(anyLong()))
                 .thenReturn(booker);
-        Mockito.when(itemStorage.findById(anyLong()))
+        Mockito.when(itemStorage.findById(item.get().getId()))
                 .thenReturn(item);
         Mockito.when(bookingStorage.findByItem_IdAndBooker_IdOrderByStartDesc(anyLong(), anyLong()))
                 .thenReturn(bookings);
@@ -332,7 +332,7 @@ public class ItemServiceMockTest {
         booking.setId(1L);
         booking.setBooker(booker);
         booking.setItem(item);
-        booking.setStart((LocalDateTime.now().plusSeconds(10)));
+        booking.setStart((LocalDateTime.now().minusSeconds(10)));
         booking.setEnd((LocalDateTime.now().plusSeconds(20)));
         booking.setStatus(BookingStatus.WAITING);
         return booking;
