@@ -87,7 +87,7 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             nativeQuery = true)
     List<Booking> findAllByOwnerAndStatusFutureOrderByStartDesc(long ownerId, String status1, String status2);
 
-    Optional<Booking> findByItemAndBooker(Item item, User bookerId);
+    Optional<Booking> findByItemAndBooker(Item item, User booker);
 
     List<Booking> findByItem_IdAndBooker_IdOrderByStartDesc(long itemId, long bookerId);
 

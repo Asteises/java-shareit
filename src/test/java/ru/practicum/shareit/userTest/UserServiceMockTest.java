@@ -34,7 +34,7 @@ public class UserServiceMockTest {
     }
 
     @Test
-    public void createUserTest() {
+    public void createUserTest() throws Exception {
         // Assign
         var user = getTestUser();
         var userDto = getTestUserDto();
@@ -55,7 +55,7 @@ public class UserServiceMockTest {
     }
 
     @Test
-    public void updateUserTest() {
+    public void updateUserTest() throws Exception {
         // Assign
         var user = getTestUser();
         var userDto = getTestUserDto();
@@ -73,7 +73,7 @@ public class UserServiceMockTest {
     }
 
     @Test
-    public void deleteUserTest() {
+    public void deleteUserTest() throws Exception {
         // Assign
         var user = getTestUser();
 
@@ -87,7 +87,7 @@ public class UserServiceMockTest {
     }
 
     @Test
-    public void findAllUsersTest() {
+    public void findAllUsersTest() throws Exception {
         // Assign
         User user1 = getTestUser();
         User user2 = getTestUser();
@@ -105,7 +105,7 @@ public class UserServiceMockTest {
     }
 
     @Test
-    public void findUserByIdTest() {
+    public void findUserByIdTest() throws Exception {
         // Assign
         var user = getTestUser();
 
