@@ -152,10 +152,8 @@ public class ItemControllerTest {
     @Test
     public void findAllItemsByUserIdTest() throws Exception {
         // Assign
-        ItemResponseDto itemResponseDto1 = ItemMapper.toItemResponseDto(getTestItem1(),
-                null, null ,null);
-        ItemResponseDto itemResponseDto2 = ItemMapper.toItemResponseDto(getTestItem2(),
-                null, null ,null);
+        ItemResponseDto itemResponseDto1 = ItemMapper.toItemResponseDto(getTestItem1(), null, null, null);
+        ItemResponseDto itemResponseDto2 = ItemMapper.toItemResponseDto(getTestItem2(), null, null, null);
         List<ItemResponseDto> items = List.of(itemResponseDto1, itemResponseDto2);
 
         when(itemService.findAllItemsByUserId(anyLong(), anyInt(), anyInt()))
