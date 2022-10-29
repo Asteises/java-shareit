@@ -9,6 +9,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repositories.ItemStorage;
 import ru.practicum.shareit.request.mapper.RequestMapper;
@@ -73,6 +75,24 @@ public class RequestServiceMockTest {
     }
 
     @Test
+    public void createRequestErrorTest() {
+        // Assign
+        User requestor = getTestUser();
+        ItemRequest itemRequest = getTestItemRequest(requestor);
+        ItemRequestDto itemRequestDto = RequestMapper.toItemRequestDto(itemRequest);
+        itemRequestDto.setDescription(null);
+
+        // Act
+        BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
+            ItemRequestDto actualItemRequestDto = requestService
+                    .createRequest(itemRequestDto, requestor.getId());
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "ItemRequest Description is empty");
+    }
+
+    @Test
     public void checkItemRequestTest() throws Exception {
         // Assign
         User requestor = getTestUser();
@@ -89,6 +109,24 @@ public class RequestServiceMockTest {
         Assertions.assertEquals(itemRequest.getId(), actualItemRequest.getId());
         Assertions.assertEquals(itemRequest.getRequestor().getId(), actualItemRequest.getRequestor().getId());
         Assertions.assertEquals(itemRequest.getDescription(), actualItemRequest.getDescription());
+    }
+
+    @Test
+    public void checkItemRequestErrorTest() {
+        // Assign
+        User requestor = getTestUser();
+        ItemRequest itemRequest = getTestItemRequest(requestor);
+
+        when(requestStorage.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        // Act
+        NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
+            ItemRequest actualItemRequest = requestService.checkItemRequest(itemRequest.getId());
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "ItemRequest by ID: 1  - not found");
     }
 
     @Test

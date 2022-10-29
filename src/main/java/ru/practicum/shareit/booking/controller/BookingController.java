@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.exception.BookingNotFound;
 import ru.practicum.shareit.booking.exception.BookingWrongTime;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.exceptions.UserNotBooker;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.exceptions.UserNotOwner;
@@ -42,7 +42,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto ownerDecision(@PathVariable long bookingId,
                                             @RequestHeader("X-Sharer-User-Id") long userId,
-                                            @RequestParam boolean approved) throws BookingNotFound, UserNotOwner {
+                                            @RequestParam boolean approved) throws NotFoundException, UserNotOwner {
         return bookingService.ownerDecision(bookingId, userId, approved);
     }
 
@@ -50,7 +50,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto getBooking(@PathVariable long bookingId,
                                  @RequestHeader("X-Sharer-User-Id") long userId)
-            throws BookingNotFound, UserNotFound, UserNotOwner, UserNotBooker {
+            throws NotFoundException, UserNotFound, UserNotOwner, UserNotBooker {
         return bookingService.getBooking(bookingId, userId);
     }
 

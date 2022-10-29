@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repositories.UserStorage;
@@ -37,8 +38,8 @@ public class UserServiceMockTest {
     @Test
     public void createUserTest() throws Exception {
         // Assign
-        var user = getTestUser();
-        var userDto = getTestUserDto();
+        User user = getTestUser();
+        UserDto userDto = getTestUserDto();
         user.setId(userDto.getId());
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
@@ -46,13 +47,32 @@ public class UserServiceMockTest {
         when(userStorage.save(any(User.class))).thenReturn(user);
 
         // Act
-        var result = userService.createUser(userDto);
+        UserDto result = userService.createUser(userDto);
 
         // Assert
         assertNotNull(result);
         assertEquals(userDto.getId(), result.getId());
         assertEquals(userDto.getName(), result.getName());
         assertEquals(userDto.getEmail(), result.getEmail());
+    }
+
+    @Test
+    public void createUserErrorTest() {
+        // Assign
+        User user = getTestUser();
+        UserDto userDto = getTestUserDto();
+        userDto.setEmail(null);
+        user.setId(userDto.getId());
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
+
+        // Act
+        BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
+            UserDto result = userService.createUser(userDto);
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "BAD EMAIL");
     }
 
     @Test

@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.booking.exception.BookingNotFound;
 import ru.practicum.shareit.booking.exception.BookingWrongTime;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -21,7 +20,7 @@ import ru.practicum.shareit.user.exceptions.UserServerError;
 public class ErrorHandler {
 
     //404
-    @ExceptionHandler({NotFoundException.class, UserNotFound.class, ItemNotFound.class, BookingNotFound.class})
+    @ExceptionHandler({NotFoundException.class, UserNotFound.class, ItemNotFound.class, NotFoundException.class})
     public ResponseEntity<String> userNotFoundHandler(final RuntimeException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }

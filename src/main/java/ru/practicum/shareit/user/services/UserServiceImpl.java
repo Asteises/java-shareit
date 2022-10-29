@@ -3,8 +3,8 @@ package ru.practicum.shareit.user.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exceptions.UserDtoBadRequest;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -22,9 +22,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto createUser(UserDto userDto) throws UserDtoBadRequest {
+    public UserDto createUser(UserDto userDto) throws BadRequestException {
         if (userDto.getEmail() == null || userDto.getEmail().isEmpty() || !userDto.getEmail().contains("@")) {
-            throw new UserDtoBadRequest("BAD EMAIL");
+            throw new BadRequestException("BAD EMAIL");
         }
         User user = UserMapper.toUser(userDto);
         user = userStorage.save(user);

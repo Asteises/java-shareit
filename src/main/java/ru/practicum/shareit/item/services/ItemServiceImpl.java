@@ -23,7 +23,6 @@ import ru.practicum.shareit.item.repositories.ItemStorage;
 import ru.practicum.shareit.request.model.entity.ItemRequest;
 import ru.practicum.shareit.request.repositories.RequestStorage;
 import ru.practicum.shareit.user.exceptions.UserNotBooker;
-import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.services.UserService;
 
@@ -47,7 +46,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemDto createItem(ItemDto itemDto, long userId) throws ItemNullParametr, NotFoundException {
+    public ItemDto createItem(ItemDto itemDto, long userId) throws BadRequestException, NotFoundException {
         User owner = userService.checkUser(userId);
         Item item;
         if (itemDto.getRequestId() == null) {
@@ -61,20 +60,20 @@ public class ItemServiceImpl implements ItemService {
             }
         }
         if (item.getAvailable() == null) {
-            throw new ItemNullParametr(String.format("Available not exist - %s", item.getAvailable()));
+            throw new BadRequestException(String.format("Available not exist - %s", item.getAvailable()));
         }
         if (item.getName() == null || item.getName().isEmpty()) {
-            throw new ItemNullParametr(String.format("Name not exist - %s", item.getName()));
+            throw new BadRequestException(String.format("Name not exist - %s", item.getName()));
         }
         if (item.getDescription() == null || item.getDescription().isEmpty()) {
-            throw new ItemNullParametr(String.format("Description not exist - %s", item.getDescription()));
+            throw new BadRequestException(String.format("Description not exist - %s", item.getDescription()));
         }
         itemStorage.save(item);
         return ItemMapper.toItemDto(item);
     }
 
     @Override
-    public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) throws UserNotFound {
+    public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) throws NotFoundException {
         Item item = checkItem(itemId);
         User owner = userService.checkUser(userId);
         if (item.getOwner().equals(owner)) {
@@ -90,7 +89,7 @@ public class ItemServiceImpl implements ItemService {
             itemStorage.save(item);
             return ItemMapper.toItemDto(item);
         } else {
-            throw new UserNotFound(String.format("User by ID: %s - is not Owner of this Item", userId));
+            throw new NotFoundException(String.format("User by ID: %s - is not Owner of this Item", userId));
         }
     }
 

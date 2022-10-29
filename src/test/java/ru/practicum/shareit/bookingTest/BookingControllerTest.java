@@ -165,10 +165,10 @@ public class BookingControllerTest {
 
         Long ownerId = 1L;
 
-        when(bookingService.getAllBookingsByBooker(anyString(), anyLong(), anyInt(), anyInt()))
+        when(bookingService.getAllBookingsByOwner(anyString(), anyLong(), anyInt(), anyInt()))
                 .thenReturn(bookings);
         // Act
-        mvc.perform(get("/bookings")
+        mvc.perform(get("/bookings/owner")
                         .header("X-Sharer-User-Id", ownerId))
                 // Assert
                 .andExpect(status().isOk())

@@ -12,18 +12,22 @@ import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repositories.BookingStorage;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentStorage;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.exceptions.ItemNotFound;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repositories.ItemStorage;
 import ru.practicum.shareit.item.services.ItemServiceImpl;
 import ru.practicum.shareit.request.model.entity.ItemRequest;
 import ru.practicum.shareit.request.repositories.RequestStorage;
+import ru.practicum.shareit.user.exceptions.UserNotBooker;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.services.UserService;
 
@@ -32,9 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceMockTest {
@@ -85,6 +88,113 @@ public class ItemServiceMockTest {
     }
 
     @Test
+    public void createItemErrorNullRequestTest() {
+        // Assign
+        User user = getTestUser();
+        ItemDto itemDto = getTestItemDto();
+        itemDto.setRequestId(2L);
+
+        Mockito.when(userService.checkUser(anyLong()))
+                .thenReturn(user);
+        Mockito.when(requestStorage.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        // Act
+        NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
+            ItemDto actualDto = itemService.createItem(itemDto, user.getId());
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "ItemRequest with ID: 2 not found");
+    }
+
+    @Test
+    public void createItemErrorNotAvailableTest() {
+        // Assign
+        User user = getTestUser();
+        ItemDto itemDto = getTestItemDto();
+        itemDto.setAvailable(null);
+        Optional<ItemRequest> itemRequest = getTestOptionalItemRequest();
+
+        Mockito.when(userService.checkUser(anyLong()))
+                .thenReturn(user);
+        Mockito.when(requestStorage.findById(anyLong()))
+                .thenReturn(itemRequest);
+
+        // Act
+        BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
+            ItemDto actualDto = itemService.createItem(itemDto, user.getId());
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "Available not exist - null");
+    }
+
+    @Test
+    public void createItemErrorNameNullTest() {
+        // Assign
+        User user = getTestUser();
+        ItemDto itemDto = getTestItemDto();
+        itemDto.setName(null);
+        Optional<ItemRequest> itemRequest = getTestOptionalItemRequest();
+
+        Mockito.when(userService.checkUser(anyLong()))
+                .thenReturn(user);
+        Mockito.when(requestStorage.findById(anyLong()))
+                .thenReturn(itemRequest);
+
+        // Act
+        BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
+            ItemDto actualDto = itemService.createItem(itemDto, user.getId());
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "Name not exist - null");
+    }
+
+    @Test
+    public void createItemErrorDescriptionNullTest() {
+        // Assign
+        User user = getTestUser();
+        ItemDto itemDto = getTestItemDto();
+        itemDto.setDescription(null);
+        Optional<ItemRequest> itemRequest = getTestOptionalItemRequest();
+
+        Mockito.when(userService.checkUser(anyLong()))
+                .thenReturn(user);
+        Mockito.when(requestStorage.findById(anyLong()))
+                .thenReturn(itemRequest);
+
+        // Act
+        BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
+            ItemDto actualDto = itemService.createItem(itemDto, user.getId());
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "Description not exist - null");
+    }
+
+    @Test
+    public void createItemErrorItemRequestNotFoundTest() {
+        // Assign
+        User user = getTestUser();
+        ItemDto itemDto = getTestItemDto();
+        itemDto.setRequestId(null);
+
+        Mockito.when(userService.checkUser(anyLong()))
+                .thenReturn(user);
+
+        // Act
+        ItemDto actualDto = itemService.createItem(itemDto, user.getId());
+
+        // Assert
+        Assertions.assertNotNull(actualDto);
+        Assertions.assertEquals(actualDto.getName(), "TestName");
+        Assertions.assertEquals(actualDto.getDescription(), "Description");
+        Assertions.assertEquals(actualDto.getRequestId(), 0);
+    }
+
+    @Test
     public void updateItemTest() throws Exception {
         // Assign
         User testUser = getTestUser();
@@ -101,6 +211,30 @@ public class ItemServiceMockTest {
         Assertions.assertEquals(actualDto.getDescription(), "Description");
         Assertions.assertEquals(actualDto.getAvailable(), Boolean.TRUE);
         Assertions.assertEquals(actualDto.getRequestId(), 1L);
+    }
+
+    @Test
+    public void updateItemErrorTest() {
+        // Assign
+        User owner = getTestUser();
+        User otherUser = getTestUser();
+        otherUser.setId(2L);
+        Item item = getTestOptionalItem().get();
+        item.setOwner(otherUser);
+        ItemDto itemDto = ItemMapper.toItemDto(item);
+
+        Mockito.when(itemStorage.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        Mockito.when(userService.checkUser(anyLong()))
+                .thenReturn(owner);
+
+        // Act
+        NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
+            ItemDto actualDto = itemService.updateItem(itemDto, itemDto.getId(), otherUser.getId());
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "User by ID: 2 - is not Owner of this Item");
     }
 
     @Test
@@ -238,6 +372,23 @@ public class ItemServiceMockTest {
     }
 
     @Test
+    public void checkItemErrorTest() {
+        // Assign
+        Item item = getTestOptionalItem().get();
+
+        Mockito.when(itemStorage.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        // Act
+        ItemNotFound thrown = Assertions.assertThrows(ItemNotFound.class, () -> {
+            Item actualItem = itemService.checkItem(item.getId());
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "Item by ID: %s  - not found");
+    }
+
+    @Test
     public void postCommentTest() throws Exception {
         // Assign
         Optional<Item> item = getTestOptionalItem();
@@ -262,6 +413,78 @@ public class ItemServiceMockTest {
         // Assert
         Assertions.assertNotNull(actualComment);
         Assertions.assertEquals(comment.getId(), actualComment.getId());
+    }
+
+    @Test
+    public void postCommentErrorEmptyTextTest() {
+        // Assign
+        Optional<Item> item = getTestOptionalItem();
+        User booker = getTestUser();
+        Booking booking = getTestBooking(booker, item.get());
+        booking.setStatus(BookingStatus.APPROVED);
+        List<Booking> bookings = List.of(booking);
+        Comment comment = getTestComment(item.get(), booker);
+        comment.setText("");
+
+        // Act
+        BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
+            CommentDto actualComment = itemService.postComment(item.get().getId(), booker.getId(), CommentMapper.toCommentDto(comment));
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "Comment is empty text");
+    }
+
+    @Test
+    public void postCommentErrorBookingBadStatusTest() {
+        // Assign
+        Optional<Item> item = getTestOptionalItem();
+        User booker = getTestUser();
+        Booking booking = getTestBooking(booker, item.get());
+        booking.setStatus(BookingStatus.REJECTED);
+        List<Booking> bookings = List.of(booking);
+        Comment comment = getTestComment(item.get(), booker);
+
+        Mockito.when(userService.checkUser(anyLong()))
+                .thenReturn(booker);
+        Mockito.when(itemStorage.findById(item.get().getId()))
+                .thenReturn(item);
+        Mockito.when(bookingStorage.findByItem_IdAndBooker_IdOrderByStartDesc(anyLong(), anyLong()))
+                .thenReturn(bookings);
+
+        // Act
+        BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
+            CommentDto actualComment = itemService.postComment(item.get().getId(), booker.getId(), CommentMapper.toCommentDto(comment));
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "Booking bad status");
+    }
+
+    @Test
+    public void postCommentErrorUserNotBookerTest() {
+        // Assign
+        Optional<Item> item = getTestOptionalItem();
+        User booker = getTestUser();
+        Booking booking = getTestBooking(booker, item.get());
+        booking.setStatus(BookingStatus.REJECTED);
+        List<Booking> bookings = new ArrayList<>();
+        Comment comment = getTestComment(item.get(), booker);
+
+        Mockito.when(userService.checkUser(anyLong()))
+                .thenReturn(booker);
+        Mockito.when(itemStorage.findById(item.get().getId()))
+                .thenReturn(item);
+        Mockito.when(bookingStorage.findByItem_IdAndBooker_IdOrderByStartDesc(anyLong(), anyLong()))
+                .thenReturn(bookings);
+
+        // Act
+        UserNotBooker thrown = Assertions.assertThrows(UserNotBooker.class, () -> {
+            CommentDto actualComment = itemService.postComment(item.get().getId(), booker.getId(), CommentMapper.toCommentDto(comment));
+        });
+
+        // Assert
+        assertEquals(thrown.getMessage(), "This User not Booker for this Item");
     }
 
     @Test
