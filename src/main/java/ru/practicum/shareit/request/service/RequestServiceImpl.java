@@ -15,7 +15,6 @@ import ru.practicum.shareit.request.model.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.dto.RequestWithResponseDto;
 import ru.practicum.shareit.request.model.entity.ItemRequest;
 import ru.practicum.shareit.request.repositories.RequestStorage;
-import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.services.UserService;
 
@@ -34,7 +33,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ItemRequestDto createRequest(ItemRequestDto itemRequestDto, long userId)
-            throws BadRequestException, UserNotFound {
+            throws BadRequestException, NotFoundException {
         if (itemRequestDto.getDescription() == null || itemRequestDto.getDescription().isEmpty()) {
             throw new BadRequestException("ItemRequest Description is empty");
         }
@@ -56,7 +55,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestWithResponseDto> getAllResponsesForAllRequests(long userId, Integer from, Integer size)
-            throws UserNotFound {
+            throws NotFoundException {
         userService.checkUser(userId);
         Page<ItemRequest> itemRequests = requestStorage.findAllByRequestor_IdOrderByCreatedDesc(
                 userId, PageRequest.of(from, size));
@@ -65,7 +64,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestWithResponseDto> getAllRequestsOtherUsers(long userId, Integer from, Integer size)
-            throws UserNotFound, BadRequestException {
+            throws NotFoundException, BadRequestException {
         User user = userService.checkUser(userId);
         Page<ItemRequest> itemRequests = requestStorage.findAllByRequestorNot(user, PageRequest.of(from, size));
         return getRequestWithResponseDto(itemRequests.toList());
@@ -82,7 +81,7 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toRequestWithResponseDto(itemRequest, requests);
     }
 
-    List<RequestWithResponseDto> getRequestWithResponseDto(List<ItemRequest> itemRequests) {
+    public List<RequestWithResponseDto> getRequestWithResponseDto(List<ItemRequest> itemRequests) {
         List<RequestWithResponseDto> requestWithResponseDtos = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             List<Item> items = itemStorage.findAllByRequest_IdOrderByRequestIdDesc(itemRequest.getId());

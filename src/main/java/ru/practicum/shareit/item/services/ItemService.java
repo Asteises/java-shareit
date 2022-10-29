@@ -1,22 +1,22 @@
 package ru.practicum.shareit.item.services;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.exceptions.ItemNotFound;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.exceptions.UserNotBooker;
-import ru.practicum.shareit.user.exceptions.UserNotFound;
 
 import java.util.List;
 
 @Service
 public interface ItemService {
 
-    ItemDto createItem(ItemDto itemDto, long userId) throws UserNotFound;
+    ItemDto createItem(ItemDto itemDto, long userId) throws NotFoundException;
 
-    ItemDto updateItem(ItemDto itemDto, long itemId, long userId) throws ItemNotFound, UserNotFound;
+    ItemDto updateItem(ItemDto itemDto, long itemId, long userId) throws ItemNotFound, NotFoundException;
 
     void deleteItem(long itemId) throws ItemNotFound;
 
@@ -31,7 +31,7 @@ public interface ItemService {
     Item checkItem(long itemId);
 
     CommentDto postComment(long itemId, long userId, CommentDto text)
-            throws UserNotFound, ItemNotFound, UserNotBooker;
+            throws NotFoundException, ItemNotFound, UserNotBooker;
 
     List<CommentDto> getAllCommentsByItem(long itemId);
 }

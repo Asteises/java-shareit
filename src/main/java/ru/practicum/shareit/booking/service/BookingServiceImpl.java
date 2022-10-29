@@ -148,7 +148,7 @@ public class BookingServiceImpl implements BookingService {
                     .map(BookingMapper::toBookingResponseDto)
                     .collect(Collectors.toList());
         }
-        throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
+        throw new BadRequestException("Unknown state: " + state);
     }
 
     @Override
@@ -194,7 +194,7 @@ public class BookingServiceImpl implements BookingService {
                     .map(BookingMapper::toBookingResponseDto)
                     .collect(Collectors.toList());
         }
-        throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
+        throw new BadRequestException("Unknown state: " + state);
     }
 
     @Override

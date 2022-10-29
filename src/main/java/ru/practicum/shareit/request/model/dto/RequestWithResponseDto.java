@@ -19,5 +19,5 @@ public class RequestWithResponseDto {
 
     private LocalDateTime created;
 
-    List<ItemForRequestDto> items;
+    private List<ItemForRequestDto> items;
 }

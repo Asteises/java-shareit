@@ -551,7 +551,7 @@ public class BookingServiceMockTest {
 
         // Act
         BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
-            List<BookingResponseDto> actualBookings = bookingService.getAllBookingsByBooker("WRONG STATE", booker.getId(), 0, 10);
+            List<BookingResponseDto> actualBookings = bookingService.getAllBookingsByBooker("UNSUPPORTED_STATUS", booker.getId(), 0, 10);
         });
 
         // Assert
@@ -782,7 +782,7 @@ public class BookingServiceMockTest {
 
         // Act
         BadRequestException thrown = Assertions.assertThrows(BadRequestException.class, () -> {
-            List<BookingResponseDto> actualBookings = bookingService.getAllBookingsByOwner("WRONG STATE", owner.getId(), 0, 10);
+            List<BookingResponseDto> actualBookings = bookingService.getAllBookingsByOwner("UNSUPPORTED_STATUS", owner.getId(), 0, 10);
         });
 
         // Assert
