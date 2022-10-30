@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ItemDto {
+public class ItemForRequestDto {
 
     private long id;
 
@@ -17,6 +17,6 @@ public class ItemDto {
 
     private Boolean available;
 
-    private Long requestId;
+    private long requestId;
 
 }

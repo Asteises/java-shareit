@@ -1,5 +1,7 @@
-package ru.practicum.shareit.booking.repositoty;
+package ru.practicum.shareit.booking.repositories;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface BookingStorage extends JpaRepository<Booking, Long> {
 
-    List<Booking> findAllByBookerOrderByStartDesc(User user);
+    Page<Booking> findAllByBookerOrderByStartDesc(User user, Pageable pageable);
 
     @Query(value = "select * from BOOKINGS B " +
             "where B.BOOKER_ID = ?1 " +
@@ -49,25 +51,19 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             "join ITEMS I on I.ID = B.ITEM_ID " +
             "where I.OWNER_ID = ?1 " +
             "and B.END_DATE < ?2 " +
-            "order by B.START_DATE desc ",
+            "order by B.START_DATE desc",
             nativeQuery = true)
     List<Booking> findAllByOwner_IdAndEndIsBefore(long ownerId, LocalDateTime end);
-
 
     @Query(value = "select * from BOOKINGS B " +
             "join ITEMS I on I.ID = B.ITEM_ID " +
             "where I.OWNER_ID = ?1 " +
             "and (B.END_DATE > ?2 and B.START_DATE < ?3)" +
-            "order by B.START_DATE desc ",
+            "order by B.START_DATE desc",
             nativeQuery = true)
     List<Booking> findAllByOwner_IdAndEndIsAfterAndStartIsBefore(long ownerId, LocalDateTime end, LocalDateTime start);
 
-    @Query(value = "select * from BOOKINGS B " +
-            "join ITEMS I on I.ID = B.ITEM_ID " +
-            "where I.OWNER_ID = ?1 " +
-            "order by B.START_DATE desc ",
-            nativeQuery = true)
-    List<Booking> findAllByItemOwner(long userId);
+    Page<Booking> findAllByItemOwnerOrderByStartDesc(User itemOwner, Pageable pageable);
 
     @Query(value = "select * from BOOKINGS B " +
             "join ITEMS I on I.ID = B.ITEM_ID " +
@@ -81,11 +77,11 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             "join ITEMS I on I.ID = B.ITEM_ID " +
             "where I.OWNER_ID = ?1 " +
             "and (B.STATUS = ?2 or B.STATUS = ?3)" +
-            "order by B.START_DATE desc ",
+            "order by B.START_DATE desc",
             nativeQuery = true)
     List<Booking> findAllByOwnerAndStatusFutureOrderByStartDesc(long ownerId, String status1, String status2);
 
-    Optional<Booking> findByItemAndBooker(Item item, User bookerId);
+    Optional<Booking> findByItemAndBooker(Item item, User booker);
 
     List<Booking> findByItem_IdAndBooker_IdOrderByStartDesc(long itemId, long bookerId);
 

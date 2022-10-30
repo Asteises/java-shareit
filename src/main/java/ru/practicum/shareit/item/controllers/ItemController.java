@@ -3,14 +3,15 @@ package ru.practicum.shareit.item.controllers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.exceptions.ItemNotFound;
 import ru.practicum.shareit.item.services.ItemService;
-import ru.practicum.shareit.user.exceptions.UserNotFound;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
@@ -23,7 +24,7 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto createItem(@RequestBody ItemDto itemDto,
-                              @RequestHeader("X-Sharer-User-Id") long userId) throws UserNotFound {
+                              @RequestHeader("X-Sharer-User-Id") long userId) throws NotFoundException {
         return itemService.createItem(itemDto, userId);
     }
 
@@ -31,7 +32,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.OK)
     public ItemDto updateItem(@RequestBody ItemDto itemDto,
                               @PathVariable long itemId,
-                              @RequestHeader("X-Sharer-User-Id") long userId) throws ItemNotFound, UserNotFound {
+                              @RequestHeader("X-Sharer-User-Id") long userId) throws ItemNotFound, NotFoundException {
         return itemService.updateItem(itemDto, itemId, userId);
     }
 
@@ -50,14 +51,18 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponseDto> findAllItemsByUserId(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.findAllItemsByUserId(userId);
+    public List<ItemResponseDto> findAllItemsByUserId(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                      @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                                      @RequestParam(required = false, defaultValue = "100") @Min(1) Integer size) {
+        return itemService.findAllItemsByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemDto> searchItemsByNameAndDescription(@RequestParam String text) {
-        return itemService.searchItemsByNameAndDescription(text);
+    public List<ItemDto> searchItemsByNameAndDescription(@RequestParam String text,
+                                                         @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                                         @RequestParam(required = false, defaultValue = "100") @Min(1) Integer size) {
+        return itemService.searchItemsByNameAndDescription(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

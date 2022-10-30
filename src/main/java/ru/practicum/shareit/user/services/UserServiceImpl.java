@@ -3,12 +3,12 @@ package ru.practicum.shareit.user.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exceptions.UserDtoBadRequest;
-import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repositoryes.UserStorage;
+import ru.practicum.shareit.user.repositories.UserStorage;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,9 +22,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto createUser(UserDto userDto) throws UserDtoBadRequest {
+    public UserDto createUser(UserDto userDto) throws BadRequestException {
         if (userDto.getEmail() == null || userDto.getEmail().isEmpty() || !userDto.getEmail().contains("@")) {
-            throw new UserDtoBadRequest("BAD EMAIL");
+            throw new BadRequestException("BAD EMAIL");
         }
         User user = UserMapper.toUser(userDto);
         user = userStorage.save(user);
@@ -66,8 +66,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User checkUser(long userId) throws UserNotFound {
+    public User checkUser(long userId) throws NotFoundException {
         return userStorage.findById(userId)
-                .orElseThrow(() -> new UserNotFound(String.format("User by ID: %s not found", userId)));
+                .orElseThrow(() -> new NotFoundException(String.format("User by ID: %s not found", userId)));
     }
 }

@@ -1,11 +1,14 @@
 package ru.practicum.shareit.item.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.repositoty.BookingStorage;
+import ru.practicum.shareit.booking.repositories.BookingStorage;
 import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.comment.CommentMapper;
@@ -16,9 +19,10 @@ import ru.practicum.shareit.item.exceptions.ItemNotFound;
 import ru.practicum.shareit.item.exceptions.ItemNullParametr;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repositores.ItemStorage;
+import ru.practicum.shareit.item.repositories.ItemStorage;
+import ru.practicum.shareit.request.model.entity.ItemRequest;
+import ru.practicum.shareit.request.repositories.RequestStorage;
 import ru.practicum.shareit.user.exceptions.UserNotBooker;
-import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.services.UserService;
 
@@ -38,26 +42,38 @@ public class ItemServiceImpl implements ItemService {
     private final BookingStorage bookingStorage;
     private final CommentStorage commentStorage;
 
+    private final RequestStorage requestStorage;
+
 
     @Override
-    public ItemDto createItem(ItemDto itemDto, long userId) throws ItemNullParametr {
+    public ItemDto createItem(ItemDto itemDto, long userId) throws BadRequestException, NotFoundException {
         User owner = userService.checkUser(userId);
-        Item item = ItemMapper.toItem(itemDto, owner, null);
+        Item item;
+        if (itemDto.getRequestId() == null) {
+            item = ItemMapper.toItem(itemDto, owner, null);
+        } else {
+            Optional<ItemRequest> optionalItemRequest = requestStorage.findById(itemDto.getRequestId());
+            if (optionalItemRequest.isPresent()) {
+                item = ItemMapper.toItem(itemDto, owner, optionalItemRequest.get());
+            } else {
+                throw new NotFoundException(String.format("ItemRequest with ID: %s not found", itemDto.getRequestId()));
+            }
+        }
         if (item.getAvailable() == null) {
-            throw new ItemNullParametr(String.format("Available not exist - %s", item.getAvailable()));
+            throw new BadRequestException(String.format("Available not exist - %s", item.getAvailable()));
         }
         if (item.getName() == null || item.getName().isEmpty()) {
-            throw new ItemNullParametr(String.format("Name not exist - %s", item.getName()));
+            throw new BadRequestException(String.format("Name not exist - %s", item.getName()));
         }
         if (item.getDescription() == null || item.getDescription().isEmpty()) {
-            throw new ItemNullParametr(String.format("Description not exist - %s", item.getDescription()));
+            throw new BadRequestException(String.format("Description not exist - %s", item.getDescription()));
         }
         itemStorage.save(item);
         return ItemMapper.toItemDto(item);
     }
 
     @Override
-    public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) throws UserNotFound {
+    public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) throws NotFoundException {
         Item item = checkItem(itemId);
         User owner = userService.checkUser(userId);
         if (item.getOwner().equals(owner)) {
@@ -73,7 +89,7 @@ public class ItemServiceImpl implements ItemService {
             itemStorage.save(item);
             return ItemMapper.toItemDto(item);
         } else {
-            throw new UserNotFound(String.format("User by ID: %s - is not Owner of this Item", userId));
+            throw new NotFoundException(String.format("User by ID: %s - is not Owner of this Item", userId));
         }
     }
 
@@ -106,10 +122,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemResponseDto> findAllItemsByUserId(long userId) {
+    public List<ItemResponseDto> findAllItemsByUserId(long userId, Integer from, Integer size) {
         List<ItemResponseDto> itemResponseDtos = new ArrayList<>();
         User owner = userService.checkUser(userId);
-        List<Item> items = itemStorage.findAllByOwnerIdOrderByIdAsc(owner.getId());
+        Page<Item> items = itemStorage.findAllByOwnerIdOrderByIdAsc(owner.getId(), PageRequest.of(from, size));
         for (Item item : items) {
             List<CommentDto> comments = CommentMapper
                     .toCommentDtos(commentStorage.getCommentsByItem_idOrderByCreatedDesc(item.getId()));
@@ -122,10 +138,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItemsByNameAndDescription(String text) {
+    public List<ItemDto> searchItemsByNameAndDescription(String text, Integer from, Integer size) {
         if (!text.isEmpty()) {
             text = text.toLowerCase();
-            return itemStorage.findAllByNameAndDescriptionLowerCase(text, text).stream()
+            return itemStorage.findAllByNameAndDescriptionLowerCase(text, text, PageRequest.of(from, size)).stream()
                     .map(ItemMapper::toItemDto).collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -172,5 +188,15 @@ public class ItemServiceImpl implements ItemService {
         Item item = checkItem(itemId);
         List<Comment> comments = commentStorage.getCommentsByItem_idOrderByCreatedDesc(itemId);
         return comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toList());
+    }
+
+    public static Boolean checkPaging(Integer from, Integer size) throws BadRequestException {
+        if (from == null && size == null) {
+            return false;
+        }
+        if (size == 0) {
+            throw new BadRequestException("size == 0");
+        }
+        return true;
     }
 }

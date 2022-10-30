@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.exception.BookingNotFound;
 import ru.practicum.shareit.booking.exception.BookingWrongTime;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.exceptions.UserNotBooker;
-import ru.practicum.shareit.user.exceptions.UserNotFound;
-import ru.practicum.shareit.user.exceptions.UserNotOwner;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -32,8 +32,8 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto createBooking(@RequestBody BookingDto bookingDto,
-                           @RequestHeader("X-Sharer-User-Id") long userId) throws BookingWrongTime {
+    public BookingResponseDto createBooking(@RequestBody BookingDto bookingDto,
+                                    @RequestHeader("X-Sharer-User-Id") long userId) throws BookingWrongTime {
         return bookingService.createBooking(bookingDto, userId);
     }
 
@@ -41,29 +41,35 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto ownerDecision(@PathVariable long bookingId,
                                             @RequestHeader("X-Sharer-User-Id") long userId,
-                                            @RequestParam boolean approved) throws BookingNotFound, UserNotOwner {
+                                            @RequestParam boolean approved) throws NotFoundException {
         return bookingService.ownerDecision(bookingId, userId, approved);
     }
 
     @GetMapping("/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
     public BookingResponseDto getBooking(@PathVariable long bookingId,
-                                 @RequestHeader("X-Sharer-User-Id") long userId)
-            throws BookingNotFound, UserNotFound, UserNotOwner, UserNotBooker {
+                                         @RequestHeader("X-Sharer-User-Id") long userId)
+            throws NotFoundException, UserNotBooker {
         return bookingService.getBooking(bookingId, userId);
     }
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public List<BookingResponseDto> getAllBookingsByBooker(@RequestParam(defaultValue = "ALL") String state,
-                                                   @RequestHeader("X-Sharer-User-Id") long userId) throws UserNotFound {
-        return bookingService.getAllBookingsByBooker(state, userId);
+    public List<BookingResponseDto> getAllBookingsByBooker(
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+            @Positive @RequestParam(required = false, defaultValue = "100") Integer size) throws NotFoundException {
+        return bookingService.getAllBookingsByBooker(state, userId, from, size);
     }
 
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
-    public List<BookingResponseDto> getAllBookingsByOwner(@RequestParam(defaultValue = "ALL") String state,
-                                                  @RequestHeader("X-Sharer-User-Id") long userId) throws UserNotFound {
-        return bookingService.getAllBookingsByOwner(state, userId);
+    public List<BookingResponseDto> getAllBookingsByOwner(
+            @RequestParam(defaultValue = "ALL") String state,
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+            @Positive @RequestParam(required = false, defaultValue = "100") Integer size) throws NotFoundException {
+        return bookingService.getAllBookingsByOwner(state, userId, from, size);
     }
 }

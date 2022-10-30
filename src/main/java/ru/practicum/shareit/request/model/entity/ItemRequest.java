@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.model.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,9 +8,6 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,7 +22,7 @@ public class ItemRequest {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "REQUESTOR", referencedColumnName = "ID", nullable = false)
     private User requestor;
 
