@@ -62,7 +62,7 @@ public class BookingControllerTest {
         Booking booking = getTestBooking();
 
         when(bookingService.createBooking(any(BookingDto.class), anyLong()))
-                .thenReturn(BookingMapper.toBookingDto(booking));
+                .thenReturn(BookingMapper.toBookingResponseDto(booking));
 
         mvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", booking.getBooker().getId())
@@ -75,8 +75,8 @@ public class BookingControllerTest {
                 .andExpect(jsonPath("$.id", is(booking.getId()), Long.class))
 //                .andExpect(jsonPath("$.start", is(booking.getStart().format(dateTimeFormatter))))
 //                .andExpect(jsonPath("$.end", is(booking.getEnd().format(dateTimeFormatter))))
-                .andExpect(jsonPath("$.itemId", is(booking.getItem().getId()), Long.class))
-                .andExpect(jsonPath("$.bookerId", is(booking.getBooker().getId()), Long.class))
+                .andExpect(jsonPath("$.item.id", is(booking.getItem().getId()), Long.class))
+                .andExpect(jsonPath("$.booker.id", is(booking.getBooker().getId()), Long.class))
                 .andExpect(jsonPath("$.status", is(booking.getStatus().toString())));
     }
 

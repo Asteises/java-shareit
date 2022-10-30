@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.exception.BookingWrongTime;
@@ -31,7 +30,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 public class BookingServiceMockTest {
@@ -75,14 +76,14 @@ public class BookingServiceMockTest {
                 .thenReturn(booking);
 
         // Act
-        BookingDto bookingDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), booker.getId());
+        BookingResponseDto bookingResponseDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), booker.getId());
 
         // Assert
-        Assertions.assertNotNull(bookingDto);
-        Assertions.assertEquals(bookingDto.getId(), booking.getId());
-        Assertions.assertEquals(bookingDto.getBookerId(), booking.getBooker().getId());
-        Assertions.assertEquals(bookingDto.getItemId(), item.getId());
-        Assertions.assertEquals(bookingDto.getStatus(), booking.getStatus());
+        Assertions.assertNotNull(bookingResponseDto);
+        Assertions.assertEquals(bookingResponseDto.getId(), booking.getId());
+        Assertions.assertEquals(bookingResponseDto.getBooker().getId(), booking.getBooker().getId());
+        Assertions.assertEquals(bookingResponseDto.getItem().getId(), item.getId());
+        Assertions.assertEquals(bookingResponseDto.getStatus(), booking.getStatus());
     }
 
     @Test
@@ -101,7 +102,7 @@ public class BookingServiceMockTest {
 
         // Act
         NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
-            BookingDto bookingDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), item.getId());
+            BookingResponseDto bookingResponseDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), item.getId());
         });
 
         // Assert
@@ -128,7 +129,7 @@ public class BookingServiceMockTest {
 
         // Act
         NotFoundException thrown = Assertions.assertThrows(NotFoundException.class, () -> {
-            BookingDto bookingDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), item.getId());
+            BookingResponseDto bookingResponseDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), item.getId());
         });
 
         // Assert
@@ -149,7 +150,7 @@ public class BookingServiceMockTest {
 
         // Act
         BookingWrongTime thrown = Assertions.assertThrows(BookingWrongTime.class, () -> {
-            BookingDto bookingDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), item.getId());
+            BookingResponseDto bookingResponseDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), item.getId());
         });
 
         // Assert
@@ -174,7 +175,7 @@ public class BookingServiceMockTest {
 
         // Act
         ItemNullParametr thrown = Assertions.assertThrows(ItemNullParametr.class, () -> {
-            BookingDto bookingDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), item.getId());
+            BookingResponseDto bookingResponseDto = bookingService.createBooking(BookingMapper.toBookingDto(booking), item.getId());
         });
 
         // Assert
@@ -576,7 +577,7 @@ public class BookingServiceMockTest {
 
         Mockito.when(userService.checkUser(anyLong()))
                 .thenReturn(owner);
-        Mockito.when(bookingRepository.findAllByItemOwner(anyLong(), any(PageRequest.class)))
+        Mockito.when(bookingRepository.findAllByItemOwnerOrderByStartDesc(any(User.class), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(booking1, booking2)));
 
         // Act
@@ -605,7 +606,7 @@ public class BookingServiceMockTest {
 
         Mockito.when(userService.checkUser(anyLong()))
                 .thenReturn(owner);
-        Mockito.when(bookingRepository.findAllByItemOwner(anyLong(), any(PageRequest.class)))
+        Mockito.when(bookingRepository.findAllByItemOwnerOrderByStartDesc(any(User.class), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(booking1, booking2)));
 
         // Act

@@ -51,25 +51,19 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             "join ITEMS I on I.ID = B.ITEM_ID " +
             "where I.OWNER_ID = ?1 " +
             "and B.END_DATE < ?2 " +
-            "order by B.START_DATE desc ",
+            "order by B.START_DATE desc",
             nativeQuery = true)
     List<Booking> findAllByOwner_IdAndEndIsBefore(long ownerId, LocalDateTime end);
-
 
     @Query(value = "select * from BOOKINGS B " +
             "join ITEMS I on I.ID = B.ITEM_ID " +
             "where I.OWNER_ID = ?1 " +
             "and (B.END_DATE > ?2 and B.START_DATE < ?3)" +
-            "order by B.START_DATE desc ",
+            "order by B.START_DATE desc",
             nativeQuery = true)
     List<Booking> findAllByOwner_IdAndEndIsAfterAndStartIsBefore(long ownerId, LocalDateTime end, LocalDateTime start);
 
-    @Query(value = "select * from BOOKINGS B " +
-            "join ITEMS I on I.ID = B.ITEM_ID " +
-            "where I.OWNER_ID = ?1 " +
-            "order by B.START_DATE desc ",
-            nativeQuery = true)
-    Page<Booking> findAllByItemOwner(long userId, Pageable pageable);
+    Page<Booking> findAllByItemOwnerOrderByStartDesc(User itemOwner, Pageable pageable);
 
     @Query(value = "select * from BOOKINGS B " +
             "join ITEMS I on I.ID = B.ITEM_ID " +
@@ -83,7 +77,7 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             "join ITEMS I on I.ID = B.ITEM_ID " +
             "where I.OWNER_ID = ?1 " +
             "and (B.STATUS = ?2 or B.STATUS = ?3)" +
-            "order by B.START_DATE desc ",
+            "order by B.START_DATE desc",
             nativeQuery = true)
     List<Booking> findAllByOwnerAndStatusFutureOrderByStartDesc(long ownerId, String status1, String status2);
 

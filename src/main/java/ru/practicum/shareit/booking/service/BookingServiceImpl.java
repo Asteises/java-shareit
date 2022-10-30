@@ -34,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemService itemService;
 
     @Override
-    public BookingDto createBooking(BookingDto bookingDto, long userId) throws BookingWrongTime, NotFoundException, ItemNullParametr {
+    public BookingResponseDto createBooking(BookingDto bookingDto, long userId) throws BookingWrongTime, NotFoundException, ItemNullParametr {
         if (validateDates(bookingDto.getStart(), bookingDto.getEnd())) {
             User booker = userService.checkUser(userId);
             Item currentItem = itemService.checkItem(bookingDto.getItemId());
@@ -54,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
                 }
                 booking.setStatus(BookingStatus.WAITING);
                 bookingRepository.save(booking);
-                return BookingMapper.toBookingDto(booking);
+                return BookingMapper.toBookingResponseDto(booking);
             } else {
                 throw new ItemNullParametr("Item is unavailable");
             }
@@ -154,13 +154,13 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getAllBookingsByOwner(String state, long userId, Integer from, Integer size)
             throws BadRequestException {
-        userService.checkUser(userId);
+        User owner = userService.checkUser(userId);
         if (state.equals("ALL")) {
             if (checkPaging(from, size)) {
-                Page<Booking> bookings = bookingRepository.findAllByItemOwner(userId, PageRequest.of(from, size));
+                Page<Booking> bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(owner, PageRequest.of(from, size));
                 return bookings.stream().map(BookingMapper::toBookingResponseDto).collect(Collectors.toList());
             }
-            return bookingRepository.findAllByItemOwner(userId, PageRequest.of(0, 100)).stream()
+            return bookingRepository.findAllByItemOwnerOrderByStartDesc(owner, PageRequest.of(0, 100)).stream()
                     .map(BookingMapper::toBookingResponseDto)
                     .collect(Collectors.toList());
         }

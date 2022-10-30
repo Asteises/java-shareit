@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 public interface BookingService {
 
-    BookingDto createBooking(BookingDto bookingDto, long userId)
+    BookingResponseDto createBooking(BookingDto bookingDto, long userId)
             throws NotFoundException, ItemNotFound, BookingWrongTime;
 
     BookingResponseDto ownerDecision(long bookingId, long userId, boolean approved)
