@@ -15,6 +15,11 @@
 
 	<name>ShareIt</name>
 
+	<modules>
+		<module>shareit-server</module>
+		<module>shareit-gateway</module>
+	</modules>
+
 	<properties>
 		<java.version>11</java.version>
 	</properties>
@@ -63,7 +68,7 @@
 	<build>
 		<resources>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>shareit-server/src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
 		</resources>
