@@ -19,8 +19,6 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.exceptions.UserNotBooker;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -33,7 +31,7 @@ public class BookingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BookingResponseDto createBooking(@RequestBody BookingDto bookingDto,
-                                    @RequestHeader("X-Sharer-User-Id") long userId) throws BookingWrongTime {
+                                            @RequestHeader("X-Sharer-User-Id") long userId) throws BookingWrongTime {
         return bookingService.createBooking(bookingDto, userId);
     }
 
@@ -58,8 +56,8 @@ public class BookingController {
     public List<BookingResponseDto> getAllBookingsByBooker(
             @RequestParam(defaultValue = "ALL") String state,
             @RequestHeader("X-Sharer-User-Id") long userId,
-            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-            @Positive @RequestParam(required = false, defaultValue = "100") Integer size) throws NotFoundException {
+            @RequestParam(required = false, defaultValue = "0") Integer from,
+            @RequestParam(required = false, defaultValue = "100") Integer size) throws NotFoundException {
         return bookingService.getAllBookingsByBooker(state, userId, from, size);
     }
 
@@ -68,8 +66,8 @@ public class BookingController {
     public List<BookingResponseDto> getAllBookingsByOwner(
             @RequestParam(defaultValue = "ALL") String state,
             @RequestHeader("X-Sharer-User-Id") long userId,
-            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-            @Positive @RequestParam(required = false, defaultValue = "100") Integer size) throws NotFoundException {
+            @RequestParam(required = false, defaultValue = "0") Integer from,
+            @RequestParam(required = false, defaultValue = "100") Integer size) throws NotFoundException {
         return bookingService.getAllBookingsByOwner(state, userId, from, size);
     }
 }
