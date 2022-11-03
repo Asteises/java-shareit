@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -18,10 +19,10 @@ public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
     @Autowired
-    public ItemClient(RestTemplateBuilder builder) {
+    public ItemClient(@Value("${shareit-server.url}")String url, RestTemplateBuilder builder) {
         super(
                 builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:9090" + API_PREFIX))
+                        .uriTemplateHandler(new DefaultUriBuilderFactory("http://server:9090" + API_PREFIX))
                         .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                         .build()
         );

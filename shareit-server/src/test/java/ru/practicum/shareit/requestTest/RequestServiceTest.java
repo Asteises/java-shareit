@@ -46,7 +46,6 @@ public class RequestServiceTest {
 
         List<RequestWithResponseDto> result = requestService.getAllResponsesForAllRequests(booker.getId(), 0, 10);
 
-        //TODO Добавить больше Assertions
         Assertions.assertNotNull(result);
         for (RequestWithResponseDto request : result) {
             Assertions.assertNotNull(request);
