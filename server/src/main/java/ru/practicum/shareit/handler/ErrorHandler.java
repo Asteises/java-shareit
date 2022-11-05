@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.booking.exception.BookingWrongTime;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemNotFound;
@@ -36,11 +35,6 @@ public class ErrorHandler {
 
     @ExceptionHandler({UserNotBooker.class})
     public ResponseEntity<String> wrongBooker(final RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    }
-
-    @ExceptionHandler({BookingWrongTime.class})
-    public ResponseEntity<String> wrongTime(final RuntimeException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

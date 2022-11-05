@@ -73,8 +73,6 @@ public class BookingControllerTest {
                 // Assert
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(booking.getId()), Long.class))
-//                .andExpect(jsonPath("$.start", is(booking.getStart().format(dateTimeFormatter))))
-//                .andExpect(jsonPath("$.end", is(booking.getEnd().format(dateTimeFormatter))))
                 .andExpect(jsonPath("$.item.id", is(booking.getItem().getId()), Long.class))
                 .andExpect(jsonPath("$.booker.id", is(booking.getBooker().getId()), Long.class))
                 .andExpect(jsonPath("$.status", is(booking.getStatus().toString())));

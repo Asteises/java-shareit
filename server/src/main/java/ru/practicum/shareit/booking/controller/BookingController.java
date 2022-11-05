@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.exception.BookingWrongTime;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.exceptions.UserNotBooker;
 
@@ -31,7 +31,7 @@ public class BookingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BookingResponseDto createBooking(@RequestBody BookingDto bookingDto,
-                                            @RequestHeader("X-Sharer-User-Id") long userId) throws BookingWrongTime {
+                                            @RequestHeader("X-Sharer-User-Id") long userId) throws BadRequestException {
         return bookingService.createBooking(bookingDto, userId);
     }
 
