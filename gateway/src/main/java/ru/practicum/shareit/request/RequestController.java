@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import javax.validation.Valid;
@@ -32,6 +33,7 @@ public class RequestController {
     public ResponseEntity<Object> getAllResponsesForAllRequests(@RequestHeader("X-Sharer-User-Id") long userId,
                                                                 @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
                                                                 @Positive @RequestParam(required = false, defaultValue = "100") Integer size) {
+        BookingController.checkPaging(from, size);
         log.info("Get all responses by userId={}, from={}, size={}", userId, from, size);
         return requestClient.getAllResponsesForAllRequests(userId, from, size);
     }
@@ -40,6 +42,7 @@ public class RequestController {
     public ResponseEntity<Object> getAllRequestsByUserId(@RequestHeader("X-Sharer-User-Id") long userId,
                                                          @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
                                                          @Positive @RequestParam(required = false, defaultValue = "100") Integer size) {
+        BookingController.checkPaging(from, size);
         log.info("Get all requests by userId={}, from={}, size={}", userId, from, size);
         return requestClient.getAllRequestsOtherUsers(userId, from, size);
     }
