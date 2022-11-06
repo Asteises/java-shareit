@@ -70,7 +70,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> postComment(@PathVariable long itemId,
                                               @RequestHeader("X-Sharer-User-Id") long userId,
-                                              @RequestBody @Validated CommentDto commentDto) {
+                                              @Valid @RequestBody CommentDto commentDto) {
         log.info("Post comment {}, userId={}, itemId={}", commentDto, userId, itemId);
         return itemClient.postComment(itemId, userId, commentDto);
     }
